@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { DollarSign, FileText, Plus, ArrowUpRight, ArrowDownRight, CreditCard, Download, Printer, CheckCircle, Clock, AlertCircle, Sparkles, Filter } from 'lucide-react';
+import { DollarSign, FileText, Plus, ArrowUpRight, ArrowDownRight, CreditCard, Download, Printer, CheckCircle, Clock, AlertCircle, Sparkles, Filter, Database } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { dbSaveInvoice } from '../firebase';
+
 
 export default function BookkeepingAssistant({ currency = 'KES' }) {
   const currencySymbols = { KES: 'KES ', USD: '$', NGN: '₦', GHS: 'GH₵', ZAR: 'R ' };
@@ -26,7 +28,7 @@ export default function BookkeepingAssistant({ currency = 'KES' }) {
   const [newCategory, setNewCategory] = useState('General Services');
   const [aiNote, setAiNote] = useState('');
 
-  const handleCreateInvoice = (e) => {
+  const handleCreateInvoice = async (e) => {
     e.preventDefault();
     if (!newClient || !newAmount) return;
 
@@ -39,6 +41,9 @@ export default function BookkeepingAssistant({ currency = 'KES' }) {
       category: newCategory
     };
 
+    // Save to Firebase Firestore Database
+    await dbSaveInvoice(newInv);
+
     setInvoices([newInv, ...invoices]);
     setNewClient('');
     setNewAmount('');
@@ -50,7 +55,7 @@ export default function BookkeepingAssistant({ currency = 'KES' }) {
       origin: { y: 0.7 }
     });
 
-    setAiNote(`✅ Invoice #${newInv.id} created for ${newInv.client}. Sent payment link automatically via WhatsApp!`);
+    setAiNote(`✅ Invoice #${newInv.id} created & saved to Firestore DB for ${newInv.client}. Sent payment link via WhatsApp!`);
   };
 
   const handleSendReminder = (id, client) => {
