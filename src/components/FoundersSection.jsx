@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShieldCheck, Target, Cpu, TrendingUp, Users, Award, CheckCircle2, Globe, Linkedin, Mail, Sparkles } from 'lucide-react';
+import { ShieldCheck, Target, Cpu, TrendingUp, Users, Award, CheckCircle2, Globe, Share2, Mail, Sparkles } from 'lucide-react';
 
 export default function FoundersSection() {
   const founders = [
