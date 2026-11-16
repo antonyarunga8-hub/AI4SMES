@@ -1,0 +1,19 @@
+{
+  "short_name": "AI4SMEs",
+  "name": "AI4SMEs Africa - AI Business OS",
+  "description": "Africa's AI Business Operating System empowering SMEs to automate customer service, bookkeeping, marketing, and lead generation.",
+  "icons": [
+    {
+      "src": "./favicon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "./",
+  "display": "standalone",
+  "theme_color": "#10b981",
+  "background_color": "#0A0E17",
+  "orientation": "portrait-primary",
+  "categories": ["business", "finance", "productivity"]
+}
