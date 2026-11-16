@@ -1,18 +1,9 @@
 import React, { useState } from 'react';
 import { MessageSquare, Bot, Calendar, Clock, CheckCircle, Plus, Zap, Users, Sparkles, Send } from 'lucide-react';
+import { useSme } from '../context/SmeContext';
 
 export default function CustomerServiceAgent({ theme }) {
-  const [faqs, setFaqs] = useState([
-    { id: 1, question: "What are your business opening hours?", answer: "We are open Monday to Saturday from 8:00 AM to 6:00 PM EAT. AI Customer Service handles inquiries 24/7.", category: "Hours & Location" },
-    { id: 2, question: "How do I make a payment via M-Pesa / Mobile Money?", answer: "Send payment to Paybill 4082210 or Till Number 982121. AI will issue instant receipt confirmation.", category: "Payments" },
-    { id: 3, question: "Do you deliver across East Africa?", answer: "Yes! We ship across Kenya, Uganda, Tanzania, and Rwanda within 24-48 hours.", category: "Shipping" }
-  ]);
-
-  const [appointments, setAppointments] = useState([
-    { id: 101, client: "Dr. Kamau - Kilimani Clinic", service: "AI Setup Consultation", date: "Today, 2:30 PM", status: "Confirmed" },
-    { id: 102, client: "Grace Wanjiku - Apex Retail", service: "Bookkeeping Onboarding", date: "Tomorrow, 10:00 AM", status: "Confirmed" },
-    { id: 103, client: "David Ochieng - Logistics Ltd", service: "WhatsApp Bot Setup", date: "Friday, 4:00 PM", status: "Pending" }
-  ]);
+  const { faqs, addFaq, appointments, businessProfile } = useSme();
 
   const [newQuestion, setNewQuestion] = useState('');
   const [newAnswer, setNewAnswer] = useState('');
@@ -38,7 +29,7 @@ export default function CustomerServiceAgent({ theme }) {
   const handleAddFaq = (e) => {
     e.preventDefault();
     if (!newQuestion || !newAnswer) return;
-    setFaqs([...faqs, { id: Date.now(), question: newQuestion, answer: newAnswer, category: "Custom FAQ" }]);
+    addFaq({ question: newQuestion, answer: newAnswer, category: "Custom FAQ" });
     setNewQuestion('');
     setNewAnswer('');
   };

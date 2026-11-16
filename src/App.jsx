@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import LandingPage from './components/LandingPage';
 import Dashboard from './components/Dashboard';
+import { SmeProvider, useSme } from './context/SmeContext';
+import MpesaStkModal from './components/MpesaStkModal';
 
-export default function App() {
+function AppContent() {
+  const { updateBusinessProfile, setCurrency, businessProfile } = useSme();
   const [view, setView] = useState('landing'); // 'landing' | 'portal'
   const [theme, setTheme] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -11,22 +14,6 @@ export default function App() {
       return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
     }
     return 'dark';
-  });
-
-  const [businessProfile, setBusinessProfile] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('ai4smes_profile');
-      if (saved) {
-        try {
-          return JSON.parse(saved);
-        } catch (e) {}
-      }
-    }
-    return {
-      name: 'Safari Ventures Africa',
-      currency: 'KES',
-      sector: 'Retail & Distribution'
-    };
   });
 
   useEffect(() => {
@@ -47,15 +34,22 @@ export default function App() {
 
   const handleLaunchPortal = (customProfile) => {
     if (customProfile) {
-      setBusinessProfile(customProfile);
-      localStorage.setItem('ai4smes_profile', JSON.stringify(customProfile));
+      if (customProfile.name || customProfile.sector) {
+        updateBusinessProfile({
+          name: customProfile.name,
+          sector: customProfile.sector
+        });
+      }
+      if (customProfile.currency) {
+        setCurrency(customProfile.currency);
+      }
     }
     setView('portal');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#0A0E17] text-slate-900 dark:text-slate-100 font-sans transition-colors duration-300">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#0A0E17] text-slate-900 dark:text-slate-100 font-sans transition-colors duration-200">
       {view === 'landing' ? (
         <LandingPage 
           onLaunchPortal={handleLaunchPortal}
@@ -71,10 +65,17 @@ export default function App() {
           }}
           theme={theme}
           toggleTheme={toggleTheme}
-          businessProfile={businessProfile}
-          setBusinessProfile={setBusinessProfile}
         />
       )}
+      <MpesaStkModal />
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <SmeProvider>
+      <AppContent />
+    </SmeProvider>
   );
 }

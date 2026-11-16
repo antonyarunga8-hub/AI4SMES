@@ -1,19 +1,18 @@
 import React, { useState } from 'react';
 import { Megaphone, Share2, Sparkles, Calendar, TrendingUp, CheckCircle, Copy, Send } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { useSme } from '../context/SmeContext';
 
-export default function MarketingManager({ theme, businessName = 'Safari Ventures Africa' }) {
+export default function MarketingManager({ theme }) {
+  const { campaigns, createCampaign, businessProfile } = useSme();
+  const businessName = businessProfile?.name || 'Safari Ventures Africa';
+
   const [productTopic, setProductTopic] = useState('');
   const [targetPlatform, setTargetPlatform] = useState('WhatsApp Status');
   const [tone, setTone] = useState('Enthusiastic & Pan-African');
   const [generatedPost, setGeneratedPost] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
-
-  const [scheduledPosts, setScheduledPosts] = useState([
-    { id: 1, platform: 'WhatsApp Status & Story', content: `🚀 Big News from ${businessName}! Get 15% off all inventory items this Friday. Tap link to order via WhatsApp!`, time: 'Friday 8:00 AM', status: 'Scheduled' },
-    { id: 2, platform: 'Instagram & Facebook', content: `Empowering our valued customers with top-tier service! Connect with ${businessName} on WhatsApp today.`, time: 'Tomorrow 2:00 PM', status: 'Scheduled' }
-  ]);
 
   const handleGenerate = (e) => {
     e.preventDefault();
@@ -38,21 +37,15 @@ export default function MarketingManager({ theme, businessName = 'Safari Venture
         spread: 50,
         origin: { y: 0.8 }
       });
-    }, 900);
+    }, 800);
   };
 
   const handleSchedule = () => {
     if (!generatedPost) return;
-    setScheduledPosts([
-      {
-        id: Date.now(),
-        platform: targetPlatform,
-        content: generatedPost,
-        time: 'Scheduled for Next Optimal Engagement Slot',
-        status: 'Scheduled'
-      },
-      ...scheduledPosts
-    ]);
+    createCampaign({
+      platform: targetPlatform,
+      content: generatedPost
+    });
   };
 
   const handleCopy = () => {
@@ -167,7 +160,7 @@ export default function MarketingManager({ theme, businessName = 'Safari Venture
               <Calendar className="w-4 h-4 text-emerald-600 dark:text-emerald-400" /> Active & Scheduled Campaigns
             </h4>
             <div className="space-y-3">
-              {scheduledPosts.map((post) => (
+              {campaigns.map((post) => (
                 <div key={post.id} className="p-4 bg-slate-50 dark:bg-slate-900/60 rounded-xl border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                   <div>
                     <div className="flex items-center gap-2 mb-1">

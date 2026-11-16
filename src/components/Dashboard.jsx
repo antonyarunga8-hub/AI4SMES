@@ -8,22 +8,17 @@ import {
   TrendingUp, 
   Smartphone, 
   Globe, 
-  LogOut, 
-  Bell, 
-  Search, 
+  Settings, 
   Menu, 
   X,
   ChevronRight,
-  ShieldCheck,
   Sparkles,
-  Zap,
-  ArrowUpRight,
   Sun,
   Moon,
-  Building,
-  CheckCircle2
+  Building
 } from 'lucide-react';
 
+import { useSme, currencySymbols } from '../context/SmeContext';
 import JamboAIAssistant from './JamboAIAssistant';
 import BookkeepingAssistant from './BookkeepingAssistant';
 import CustomerServiceAgent from './CustomerServiceAgent';
@@ -31,10 +26,12 @@ import MarketingManager from './MarketingManager';
 import SalesLeadAgent from './SalesLeadAgent';
 import BusinessAdvisor from './BusinessAdvisor';
 import WhatsAppSimulator from './WhatsAppSimulator';
+import SettingsManager from './SettingsManager';
+import NotificationsDropdown from './NotificationsDropdown';
 
-export default function Dashboard({ onBackToLanding, theme, toggleTheme, businessProfile, setBusinessProfile }) {
+export default function Dashboard({ onBackToLanding, theme, toggleTheme }) {
+  const { businessProfile, currency, setCurrency, formatMoney, totalRevenue, netProfit, pipelineValue } = useSme();
   const [activeTab, setActiveTab] = useState('overview');
-  const [currency, setCurrency] = useState(businessProfile?.currency || 'KES');
   const [language, setLanguage] = useState('English');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -55,15 +52,9 @@ export default function Dashboard({ onBackToLanding, theme, toggleTheme, busines
     { id: 'bookkeeping', label: 'AI Bookkeeping & Invoices', icon: FileText },
     { id: 'marketing', label: 'AI Marketing Manager', icon: Megaphone },
     { id: 'leads', label: 'AI Sales & Lead CRM', icon: Target },
-    { id: 'advisor', label: 'AI Business Advisor', icon: TrendingUp }
+    { id: 'advisor', label: 'AI Business Advisor', icon: TrendingUp },
+    { id: 'settings', label: 'Settings & AI Rules', icon: Settings }
   ];
-
-  const handleCurrencyChange = (newCurr) => {
-    setCurrency(newCurr);
-    if (setBusinessProfile) {
-      setBusinessProfile(prev => ({ ...prev, currency: newCurr }));
-    }
-  };
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#0A0E17] text-slate-900 dark:text-slate-100 flex flex-col md:flex-row transition-colors duration-200">
@@ -87,10 +78,10 @@ export default function Dashboard({ onBackToLanding, theme, toggleTheme, busines
           <div className="p-3 bg-slate-100 dark:bg-slate-900/80 rounded-xl border border-slate-200 dark:border-slate-800">
             <div className="flex items-center gap-2 text-xs font-bold text-slate-900 dark:text-white truncate">
               <Building className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
-              <span className="truncate">{businessProfile?.name || 'Safari Ventures Africa'}</span>
+              <span className="truncate">{businessProfile.name}</span>
             </div>
             <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium block mt-0.5">
-              {businessProfile?.sector || 'SME Business'} • Live
+              {businessProfile.sector} • {businessProfile.country}
             </span>
           </div>
         </div>
@@ -156,11 +147,11 @@ export default function Dashboard({ onBackToLanding, theme, toggleTheme, busines
           </div>
           <div>
             <span className="font-extrabold text-slate-900 dark:text-white text-sm block leading-none">AI4SMEs Africa OS</span>
-            <span className="text-[10px] text-slate-500 dark:text-slate-400">{businessProfile?.name || 'Safari Ventures'}</span>
+            <span className="text-[10px] text-slate-500 dark:text-slate-400">{businessProfile.name}</span>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          {/* Theme Toggle Button Mobile */}
+          <NotificationsDropdown />
           <button
             onClick={toggleTheme}
             aria-label="Toggle theme"
@@ -215,7 +206,7 @@ export default function Dashboard({ onBackToLanding, theme, toggleTheme, busines
         <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 glass-panel p-4 rounded-2xl">
           <div>
             <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
-              <span>{businessProfile?.name || 'SME Business'} Operating System</span>
+              <span>{businessProfile.name} Operating System</span>
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
             </h2>
             <p className="text-slate-500 dark:text-slate-400 text-xs sm:text-sm">
@@ -224,6 +215,11 @@ export default function Dashboard({ onBackToLanding, theme, toggleTheme, busines
           </div>
 
           <div className="flex items-center gap-3 flex-wrap">
+            {/* Notifications Dropdown */}
+            <div className="hidden sm:block">
+              <NotificationsDropdown />
+            </div>
+
             {/* Theme Toggle Button Desktop */}
             <button
               onClick={toggleTheme}
@@ -231,11 +227,7 @@ export default function Dashboard({ onBackToLanding, theme, toggleTheme, busines
               className="p-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all shadow-sm"
               title={theme === 'dark' ? 'Switch to Clean Light Mode' : 'Switch to Dark Mode'}
             >
-              {theme === 'dark' ? (
-                <Sun className="w-4 h-4 text-amber-400" />
-              ) : (
-                <Moon className="w-4 h-4 text-slate-700" />
-              )}
+              {theme === 'dark' ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-700" />}
             </button>
 
             {/* Currency Selector */}
@@ -243,7 +235,7 @@ export default function Dashboard({ onBackToLanding, theme, toggleTheme, busines
               <span className="text-slate-500 dark:text-slate-400 text-[11px] font-medium px-1">Currency:</span>
               <select
                 value={currency}
-                onChange={(e) => handleCurrencyChange(e.target.value)}
+                onChange={(e) => setCurrency(e.target.value)}
                 className="bg-slate-100 dark:bg-slate-950 text-emerald-700 dark:text-emerald-400 font-bold px-2 py-1 rounded-lg border border-slate-200 dark:border-slate-800 focus:outline-none"
               >
                 {currencies.map((c) => (
@@ -281,9 +273,9 @@ export default function Dashboard({ onBackToLanding, theme, toggleTheme, busines
               <div className="glass-panel p-5 rounded-2xl">
                 <div className="text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase">Net Monthly Profit</div>
                 <p className="text-2xl sm:text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-2">
-                  {currency === 'USD' ? '$4,040' : currency === 'NGN' ? '₦5,050,000' : 'KES 525,000'}
+                  {formatMoney(netProfit)}
                 </p>
-                <p className="text-slate-500 dark:text-slate-400 text-xs mt-1">From KES 845,000 gross revenue</p>
+                <p className="text-slate-500 dark:text-slate-400 text-xs mt-1">From {formatMoney(totalRevenue)} gross revenue</p>
               </div>
 
               <div className="glass-panel p-5 rounded-2xl">
@@ -295,9 +287,9 @@ export default function Dashboard({ onBackToLanding, theme, toggleTheme, busines
               <div className="glass-panel p-5 rounded-2xl">
                 <div className="text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase">Lead Pipeline Value</div>
                 <p className="text-2xl sm:text-3xl font-extrabold text-amber-600 dark:text-amber-400 mt-2">
-                  {currency === 'USD' ? '$4,920' : 'KES 640,000'}
+                  {formatMoney(pipelineValue)}
                 </p>
-                <p className="text-slate-500 dark:text-slate-400 text-xs mt-1">5 high-intent qualified deals</p>
+                <p className="text-slate-500 dark:text-slate-400 text-xs mt-1">Active qualified pipeline</p>
               </div>
 
               <div className="glass-panel p-5 rounded-2xl">
@@ -354,6 +346,14 @@ export default function Dashboard({ onBackToLanding, theme, toggleTheme, busines
                       <span className="font-semibold text-violet-700 dark:text-violet-400">Review Qualified Lead Pipeline</span>
                       <ChevronRight className="w-4 h-4 text-slate-400" />
                     </button>
+
+                    <button
+                      onClick={() => setActiveTab('settings')}
+                      className="w-full p-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-900/80 dark:hover:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs transition-all text-slate-800 dark:text-slate-200"
+                    >
+                      <span className="font-semibold text-blue-700 dark:text-blue-400">Configure Business Settings & Rules</span>
+                      <ChevronRight className="w-4 h-4 text-slate-400" />
+                    </button>
                   </div>
                 </div>
               </div>
@@ -376,10 +376,11 @@ export default function Dashboard({ onBackToLanding, theme, toggleTheme, busines
         )}
 
         {activeTab === 'customer_service' && <CustomerServiceAgent theme={theme} />}
-        {activeTab === 'bookkeeping' && <BookkeepingAssistant currency={currency} theme={theme} businessName={businessProfile?.name} />}
-        {activeTab === 'marketing' && <MarketingManager theme={theme} businessName={businessProfile?.name} />}
-        {activeTab === 'leads' && <SalesLeadAgent currency={currency} theme={theme} />}
-        {activeTab === 'advisor' && <BusinessAdvisor currency={currency} theme={theme} businessName={businessProfile?.name} />}
+        {activeTab === 'bookkeeping' && <BookkeepingAssistant theme={theme} />}
+        {activeTab === 'marketing' && <MarketingManager theme={theme} />}
+        {activeTab === 'leads' && <SalesLeadAgent theme={theme} />}
+        {activeTab === 'advisor' && <BusinessAdvisor theme={theme} />}
+        {activeTab === 'settings' && <SettingsManager theme={theme} />}
       </main>
     </div>
   );
