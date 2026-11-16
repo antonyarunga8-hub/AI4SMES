@@ -3,6 +3,7 @@ import LandingPage from './components/LandingPage';
 import Dashboard from './components/Dashboard';
 import { SmeProvider, useSme } from './context/SmeContext';
 import MpesaStkModal from './components/MpesaStkModal';
+import ErrorBoundary from './components/ErrorBoundary';
 
 function AppContent() {
   const { updateBusinessProfile, setCurrency, businessProfile } = useSme();
@@ -74,8 +75,10 @@ function AppContent() {
 
 export default function App() {
   return (
-    <SmeProvider>
-      <AppContent />
-    </SmeProvider>
+    <ErrorBoundary>
+      <SmeProvider>
+        <AppContent />
+      </SmeProvider>
+    </ErrorBoundary>
   );
 }

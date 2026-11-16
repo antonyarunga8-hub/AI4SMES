@@ -12,7 +12,8 @@ import {
   Printer, 
   Smartphone,
   Send,
-  X
+  X,
+  Download
 } from 'lucide-react';
 import { useSme } from '../context/SmeContext';
 
@@ -61,6 +62,27 @@ export default function BookkeepingAssistant({ theme }) {
   const handleSendReminder = (id, client) => {
     sendInvoiceReminder(id);
     setAiNote(`💬 Sent WhatsApp payment reminder with automated M-Pesa / Bank link to ${client} for invoice #${id}.`);
+  };
+
+  const exportInvoicesCsv = () => {
+    const headers = ["Invoice ID", "Client Name", "Category", "Date", `Amount (${currency})`, "Status", "Phone"];
+    const rows = invoices.map(i => [
+      i.id,
+      `"${(i.client || '').replace(/"/g, '""')}"`,
+      `"${(i.category || '').replace(/"/g, '""')}"`,
+      i.date,
+      i.amount,
+      i.status,
+      `"${(i.phone || '').replace(/"/g, '""')}"`
+    ]);
+    const csvContent = "data:text/csv;charset=utf-8," + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `ai4smes_invoices_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
@@ -150,6 +172,14 @@ export default function BookkeepingAssistant({ theme }) {
             <p className="text-slate-500 dark:text-slate-400 text-xs">Integrated with WhatsApp invoice delivery & M-Pesa STK push APIs</p>
           </div>
           <div className="flex items-center gap-2">
+            <button
+              onClick={exportInvoicesCsv}
+              className="text-xs px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 hover:text-emerald-600 dark:hover:text-emerald-400 font-semibold flex items-center gap-1.5 transition-all shadow-sm"
+              title="Download Invoices as CSV"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span>Export CSV</span>
+            </button>
             <span className="text-xs px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-medium">
               Ledger Currency: {currency}
             </span>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Target, Users, UserCheck, Search, Sparkles, Send, Plus, Phone, MapPin, X } from 'lucide-react';
+import { Target, Users, UserCheck, Search, Sparkles, Send, Plus, Phone, MapPin, X, Download } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { useSme } from '../context/SmeContext';
 
@@ -51,6 +51,29 @@ export default function SalesLeadAgent({ theme }) {
       phone: '+254 '
     });
     confetti({ particleCount: 35, spread: 50 });
+  };
+
+  const exportLeadsCsv = () => {
+    const headers = ["Company Name", "Decision Maker", "Location", "AI Score", "Stage", `Estimated Value (${currency})`, "Source", "Phone", "Last Contact"];
+    const rows = leads.map(l => [
+      `"${(l.name || '').replace(/"/g, '""')}"`,
+      `"${(l.contact || '').replace(/"/g, '""')}"`,
+      `"${(l.location || '').replace(/"/g, '""')}"`,
+      l.score,
+      l.stage,
+      l.val,
+      `"${(l.source || '').replace(/"/g, '""')}"`,
+      `"${(l.phone || '').replace(/"/g, '""')}"`,
+      `"${(l.lastContact || '').replace(/"/g, '""')}"`
+    ]);
+    const csvContent = "data:text/csv;charset=utf-8," + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `ai4smes_crm_leads_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const filteredLeads = leads.filter(l => {
@@ -147,6 +170,13 @@ export default function SalesLeadAgent({ theme }) {
               ))}
             </div>
 
+            <button
+              onClick={exportLeadsCsv}
+              className="border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:text-emerald-600 dark:hover:text-emerald-400 text-slate-700 dark:text-slate-300 font-semibold px-3 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow-sm transition-all"
+              title="Download Leads as CSV"
+            >
+              <Download className="w-3.5 h-3.5" /> Export CSV
+            </button>
             <button
               onClick={() => setShowAddModal(true)}
               className="bg-emerald-600 hover:bg-emerald-500 text-white dark:bg-emerald-500 dark:hover:bg-emerald-600 dark:text-slate-950 font-bold px-3 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow"
